@@ -1,4 +1,5 @@
 {
+  "author" : "Ciprian Danea <ciprian@danea.ro>",
   "name": "turbo-read",
   "private": true,
   "version": "0.1.2",
