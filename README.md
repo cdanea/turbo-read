@@ -4,7 +4,7 @@
 
 I built this after watching a SourceFED report on YT on spritzing.
 
-I found it helpend me reach 800WPM on their English demo, and I really wanted to check out how fast I could spritz in my native language.
+I found it helped me reach 800WPM on their English demo, and I really wanted to check out how fast I could spritz in my native language.
 
 I'll buy the original as soon as it becomes available on my mobile device. If that'll take too long I'll probably even switch vendor to a follow this app as it is really awesome.
 
