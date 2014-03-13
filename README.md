@@ -10,7 +10,8 @@ I'll buy the original as soon as it becomes available on my mobile device. If th
 
 I found that being tired/rested influences spritzing speed greatly (by 100% relative increase in my case when I am rested, versus trying this at 4AM when I actually finished this demo.)
 
-                    This project is not meant to be production ready. There are several parameters that need to become configurable before this could be usable:
+
+This project is not meant to be production ready. There are several parameters that need to become configurable before this could be usable:
 
 *   Slider instead of discrete speed selector
 *   Word transitions: smooth, instant(like it is now), morph (i find the current setting to be suboptimal for me, and a smooth fading between words really helps me
@@ -23,6 +24,4 @@ I found that being tired/rested influences spritzing speed greatly (by 100% rela
 *   Accept other file formats, not just plain text
 *   Allow URLs, not just files so you get web page parsing.
 
-                **
-                    Mouseover the reading panel to reveal this menu when hidden.
-                **
+    Mouseover the reading panel to reveal this menu when hidden.
