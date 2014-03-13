@@ -1,0 +1,284 @@
+<html>
+<head>
+    <link rel='stylesheet' href='http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css'/>
+    <link rel='stylesheet' href='http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap-theme.min.css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700&subset=latin,vietnamese,cyrillic-ext,cyrillic,latin-ext,greek' rel='stylesheet' type='text/css'>
+    <style>
+        strong {
+            font-weight: 600;
+            color:#ff0000;
+        }
+        .left{
+            display:inline-block;
+            text-align:right;
+            width:200px;
+            margin-top: 5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .right{
+            margin-top: 5px;
+            margin-bottom: 4px;
+            display:inline-block;
+            width: 300px;
+            text-align:left;
+            font-weight: 600;
+        }
+        .reader {
+            border-top: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 32;
+            font-stretch: expanded;
+            width: 500px;
+            margin: 20px;
+
+        }
+        .leftbg {
+            position: absolute;
+            width: 205px;
+            z-index: -1;
+            display:block;
+            border-right: 2px solid #000000;
+            text-align:left;
+            max-height: 8px;
+            height: 8px;
+            margin-top: 47px;
+        }
+        .rightbg {
+            position: fixed;
+            width: 205px;
+            z-index: -1;
+            display:block;
+            border-right: 2px solid #000000;
+            text-align:left;
+            max-height: 8px;
+            height: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container hide">
+        <div class="reader row">
+            <div class="border">
+                <span class="leftbg">&nbsp;</span>
+                <span class="rightbg">&nbsp;</span>
+            <span id=word>
+                <span class="left" id="l"></span><span class="right"><strong id="c"></strong><span id="r"></span></span>
+            </span>
+            </div>
+        </div>
+        <div class="controls row col-lg-12">
+            <form class="form form-inline form-controls">
+                <select id="wpm" name="wpm">
+                    <option>1</option>
+                    <option selected="selected">250</option>
+                    <option>300</option>
+                    <option>350</option>
+                    <option>400</option>
+                    <option>450</option>
+                    <option>500</option>
+                    <option>550</option>
+                    <option>600</option>
+                    <option>650</option>
+                    <option>700</option>
+                    <option>750</option>
+                    <option>800</option>
+                    <option>850</option>
+                    <option>900</option>
+                    <option>950</option>
+                    <option>1000</option>
+                </select>
+                <button id="pause" type="button">Pause</button>
+                <button id="hide" type="button">Hide</button>
+                <button id="demo" type="button" title="http://www.gutenberg.org/cache/epub/76/pg76.txt">Demo: Adventures of Huckleberry Finn</button>
+                <input type="file" name="file" id="file" placeholder="Select your text" />
+            </form>
+            <div class="well col-lg-6">
+                <h2>Shoutout to the real-deal: <a href="http://www.spritzinc.com/">Spritz</a></h2>
+                <h3>Disclaimer:</h3>
+                <p>I built this after watching a SourceFED report on YT on spritzing.</p>
+                <p>I found it helpend me reach 800WPM on their English demo, and I really wanted to check out how fast I could spritz in my native language.</p>
+                <p>I'll buy the original as soon as it becomes available on my mobile device. If that'll take too long I'll probably even switch vendor to a follow this app as it is really awesome.</p>
+                <p>I found that being tired/rested influences spritzing speed greatly (by 100% relative increase in my case when I am rested, versus trying this at 4AM when I actually finished this demo.)</p>
+                <p>
+                    This project is not meant to be production ready. There are several parameters that need to become configurable before this could be usable:
+                    <ul>
+                        <li>Slider instead of discrete speed selector</li>
+                        <li>Word transitions: smooth, instant(like it is now), morph (i find the current setting to be suboptimal for me, and a smooth fading between words really helps me</li>
+                        <li>Better and <i>localized</i> long word breaking</li>
+                        <li>Stop char (.,!?:;) delay handling configuration/tweaking</li>
+                        <li>Localized word center-weight point detection</li>
+                        <li>Center-weight leter color customization</li>
+                        <li>Font size, font-family, font-style customization</li>
+                        <li>Chapter detection, progress bar, bookmarks - text navigation in general</li>
+                        <li>Accept other file formats, not just plain text</li>
+                        <li>Allow URLs, not just files so you get web page parsing.</li>
+                    </ul>
+                </p>
+                <strong>
+                    Mouseover the reading panel to reveal this menu when hidden.
+                </strong>
+            </div>
+        </div>
+    </div>
+    <script src="javascripts/util.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+    <script>
+        $(function () {
+            var
+                wsplit = function (word, bias) {
+                    var offset = word.length % 2 ? word.length / 2 : (word.length - 1) / 2;
+                    while(offset>=0 && word.substring(offset, offset + 1).match(/\s+/)) {
+                        offset--;
+                    }
+                    return {
+                        length: word.length,
+                        word: word,
+                        l: word.substring(0, offset),
+                        c: word.substring(offset, offset + 1),
+                        r: word.substring(offset + 1)
+                    }
+                },
+                Total = 0,
+                Run = true,
+                WPM = 250,
+                Delay = function (word) {
+                    word = word || '';
+                    var
+                            add = 0,
+                            last = word.substring(word.length-1),
+                            first = word.substring(0,1),
+                            Capitalized = first.toLowerCase()!=first,
+                            punctuation = {
+                                ',': 15,
+                                '.': 20,
+                                '!': 20,
+                                '?': 25,
+                                '-': 25,
+                                ';': 20,
+                                ':': 20
+                            }
+                        ;
+                    add += punctuation[last] || 0;
+                    add += Capitalized ? 15 : 0;
+                    add += first == '-' ? 25 : 0;
+                    if(word.length < 4) {
+                        add = (4 - word.length) * 4;
+                    } else {
+                        add = word.length * 3;
+                    }
+                    return Math.floor(1000 / (WPM / 60)) + word.length * 2;
+                },
+                Word = Backbone.Model.extend({
+                    els: {
+                        l: $('#l'),
+                        c: $('#c'),
+                        r: $('#r')
+                    },
+                    render: function (callback) {
+                        this.els.l.html(this.attributes.l);
+                        this.els.c.html(this.attributes.c);
+                        this.els.r.html(this.attributes.r);
+                        if (callback instanceof Function) {
+                            setTimeout(callback, Delay(this.attributes.word));
+                        }
+                    }
+                })
+                    ;
+            $('#wpm').on('change', function() {WPM = $(this).val();});
+            $('#pause').on('click', function(e) {
+                Run = !Run;
+                $(this).text(Run?'Pause':'Resume');
+                e.preventDefault();
+            });
+            $('#demo').on('click', function(e) {
+                if(_.contains(['http:', 'https:'],window.location.protocol)) {
+                    var $that = $('#file');
+                    $that.words = [];
+                    (new Word(wsplit("Loading file ..."))).render();
+                    $.get('./Adventures of Huckleberry Finn.txt', function(data) {
+                        $that.words = str_word_count(data,1, '\u00e0\u00e1\u00e3\u00e73' + "'’.-,!?\""), check = null;
+                        Total = $that.words.length;
+                        (function r() {
+                            if(Run) {
+                                $('#percent').text((Math.floor(10000*(1-$that.words.length/Total))/100) + '%');
+                                $('#progress').css('width', (340 - Math.floor(340*$that.words.length/Total)) + 'px');
+                                var crt = $that.words.shift();
+                                if(crt.length > 13) {
+                                    $that.words.unshift('-' + crt.substring(12));
+                                    $that.words.length && (new Word(wsplit(crt.substring(0, 12)+'-'))).render(r);
+                                } else {
+                                    $that.words.length && (new Word(wsplit(crt))).render(r);
+                                }
+                            } else {
+                                setTimeout(r, 100);
+                            }
+                        })();
+                        $('div.controls').fadeOut('slow', function() {
+                            $('div.reader.row').one('mouseover', function() {
+                                if(Run) {
+                                    $('div.controls').fadeIn('slow');
+                                }
+                            });
+                        });
+                    });
+                } else {
+                    alert('Use the upload button and select the demo file. Asynchronous requests do not work if you load the file locally via '+window.location.protocol+'//');
+                }
+
+                e.preventDefault();
+            });
+            $('#hide').on('click', function(e) {
+                $('div.controls').fadeOut('slow', function() {
+                    $('div.reader.row').one('mouseover', function() {
+                        if(Run) {
+                            $('div.controls').fadeIn('slow');
+                        }
+                    });
+                });
+                e.preventDefault();
+            });
+            $('#file').on('change', function (event) {
+                (new Word(wsplit("Loading file ..."))).render();
+                var file = this.files[0], $that = $(this);
+                var fr = new FileReader();
+                fr.onload = function() {
+                    (function(data) {
+                        $that.words = str_word_count(data,1, '\u00e0\u00e1\u00e3\u00e73' + "'’.-,!?\""), check = null;
+                        Total = $that.words.length;
+                        (function r() {
+                            if(Run) {
+                                $('#percent').text((Math.floor(10000*(1-$that.words.length/Total))/100) + '%');
+                                $('#progress').css('width', (340 - Math.floor(340*$that.words.length/Total)) + 'px');
+                                var crt = $that.words.shift();
+                                if(crt.length > 13) {
+                                    $that.words.unshift('-' + crt.substring(12));
+                                    $that.words.length && (new Word(wsplit(crt.substring(0, 12)+'-'))).render(r);
+                                } else {
+                                    $that.words.length && (new Word(wsplit(crt))).render(r);
+                                }
+                            } else {
+                                setTimeout(r, 100);
+                            }
+                        })();
+                        $('div.controls').fadeOut('slow', function() {
+                            $('div.reader.row').one('mouseover', function() {
+                                if(Run) {
+                                    $('div.controls').fadeIn('slow');
+                                }
+                            });
+                        });
+                    })(this.result);
+                };
+                fr.readAsText(file);
+            });
+            (new Word(wsplit("Waiting for input..."))).render(function() {$('div.container.hide').removeClass('hide');});
+
+        })
+    </script>
+</body>
+</html>

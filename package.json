@@ -1,0 +1,13 @@
+{
+  "name": "turbo-read",
+  "private": true,
+  "version": "0.1.2",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "readme": "Fast reading",
+  "dependencies": {
+    "express": "3.4.8"
+  }
+}
